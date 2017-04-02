@@ -5,6 +5,10 @@ const url = require('url');
 const zlib = require('zlib');
 
 // demo #1 - including path and file system modules
+const path = require('path');
+const fs  = require('fs');
+
+
 
 const defaultFile = 'index.html';
 const logFile = 'web.log';
@@ -14,6 +18,11 @@ const port = 3000;
 
 // demo #4: append to log file
 
+const log = entry => fs.appendFile(logFile, `${entry}\n`,'utf-8');
+const error = entry => log(`error : ${entry}`);
+const info = entry => log(`info : ${entry}`);
+
+
 const server = http.createServer((req, res) => {
 
 	req.originalUrl = req.url;
@@ -21,6 +30,23 @@ const server = http.createServer((req, res) => {
 	req.path = req.url.pathname === '/' ? defaultFile : req.url.pathname;
 
 	// demo #2: using path functions to create requested file name
+	let dirName = path.dirname(req.path);
+	if(dirName.endsWith('/'))
+	{ 
+		dirName = dirName.slice(0, dirName.length - 1);
+		
+	}
+
+	const reqFileName = path.format(
+		{
+			dir: path.join(__dirname, 'www', dirName),
+			base : path.basename(req.path)
+
+		}
+	);
+
+console.log(reqFileName);
+
 
 	const processBody = new Promise(resolve => {
 
@@ -32,14 +58,29 @@ const server = http.createServer((req, res) => {
 
 	const processFile = new Promise(resolve => {
 
-		resolve();
 
-		res.writeHead(200);
-		res.end('Hello World!');
 
 		// demo #3: read request file
+		fs.readFile(reqFileName,'utf8',(err,fileData) => {
+			if(err) {
+				error(err);
+				res.writeHead(404);
+				res.end('File Not Found');
+				return;
+				
+			}
+				info(`${req.method} ${req.originalUrl}`);
+				res.writeHead(200);
+				res.end(fileData);
+
+
+		});
 
 		// demo #7: compressing response
+				resolve();
+
+		// res.writeHead(200);
+		// res.end('Hello World!');
 
 	});
 
