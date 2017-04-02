@@ -15,7 +15,29 @@ const logFile = 'web.log';
 const port = 3000;
 
 // demo #5: rotate log file
+try {
+	fs.statSync(logFile);
 
+	//web_1.log
+	// web_2.log 
+	const {name: fileName , ext: fileExt } = path.parse(logFile);
+	let i = 0;
+	let nexLogFile;
+
+	try {
+		
+		do {
+			nexLogFile = `${fileName}_${++i}${fileExt}`;
+		} while (fs.statSync(nexLogFile));
+
+	} catch (error) {
+		fs.renameSync(logFile,nexLogFile);
+		console.log('log file was rotated');
+	}
+
+}catch(err){
+	console.log('no log file to rotate');
+}
 // demo #4: append to log file
 
 const log = entry => fs.appendFile(logFile, `${entry}\n`,'utf-8');
