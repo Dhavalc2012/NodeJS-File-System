@@ -91,24 +91,32 @@ console.log(reqFileName);
 
 
 		// demo #3: read request file
-		fs.readFile(reqFileName,'utf8',(err,fileData) => {
-			if(err) {
-				error(err);
-				res.writeHead(404);
-				res.end('File Not Found');
-				return;
+		// fs.readFile(reqFileName,'utf8',(err,fileData) => {
+		// 	if(err) {
+		// 		error(err);
+		// 		res.writeHead(404);
+		// 		res.end('File Not Found');
+		// 		return;
 				
-			}
-				info(`${req.method} ${req.originalUrl}`);
-				res.writeHead(200);
-				res.end(fileData);
+		// 	}
+		// 		info(`${req.method} ${req.originalUrl}`);
+		// 		res.writeHead(200);
+		// 		res.end(fileData);
+		// 			resolve();
 
-
-		});
+		// });
 
 		// demo #7: compressing response
-				resolve();
+			
+		res.on('finish',() => {
+			info(`${req.method} ${req.originalUrl}`);
+			resolve();
+		});
 
+		const raw = fs.createReadStream(reqFileName);
+		res.writeHead(200,{'Content-Encoding' : 'gzip'});
+		raw.pipe(zlib.createGzip()).pipe(res);
+		
 		// res.writeHead(200);
 		// res.end('Hello World!');
 
