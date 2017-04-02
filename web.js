@@ -7,9 +7,6 @@ const zlib = require('zlib');
 // demo #1 - including path and file system modules
 const path = require('path');
 const fs  = require('fs');
-
-
-
 const defaultFile = 'index.html';
 const logFile = 'web.log';
 const port = 3000;
@@ -72,9 +69,20 @@ console.log(reqFileName);
 
 	const processBody = new Promise(resolve => {
 
-		resolve();
+		
 
 		// demo #6: process request body data
+		if (req.method === 'POST'){
+			const reqBodyBuffer = [];
+			req.on('data', chunk => reqBodyBuffer.push(new Buffer(chunk)));
+			req.on('end', () => {
+				console.log(Buffer.concat(reqBodyBuffer).toString('utf8'));
+				resolve();
+			});
+		}
+		else{
+			resolve();
+		}
 
 	});
 
